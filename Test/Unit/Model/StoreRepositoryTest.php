@@ -48,17 +48,14 @@ class StoreRepositoryTest extends TestCase
      */
     private $appConfigMock;
 
-    /**
-     * @inheritdoc
-     */
     protected function setUp(): void
     {
         $this->storeFactory = $this->getMockBuilder(StoreFactory::class)
-            ->onlyMethods(['create'])
+            ->setMethods(['create'])
             ->disableOriginalConstructor()
             ->getMock();
         $this->storeCollectionFactory = $this->getMockBuilder(CollectionFactory::class)
-            ->onlyMethods(['create'])
+            ->setMethods(['create'])
             ->disableOriginalConstructor()
             ->getMock();
         $this->storeRepository = new StoreRepository(
@@ -71,10 +68,7 @@ class StoreRepositoryTest extends TestCase
         $this->initDistroList();
     }
 
-    /**
-     * @return void
-     */
-    private function initDistroList(): void
+    private function initDistroList()
     {
         $repositoryReflection = new \ReflectionClass($this->storeRepository);
         $deploymentProperty = $repositoryReflection->getProperty('appConfig');
@@ -82,10 +76,7 @@ class StoreRepositoryTest extends TestCase
         $deploymentProperty->setValue($this->storeRepository, $this->appConfigMock);
     }
 
-    /**
-     * @return void
-     */
-    public function testGetWithException(): void
+    public function testGetWithException()
     {
         $this->expectException(NoSuchEntityException::class);
         $this->expectExceptionMessage('The store that was requested wasn\'t found. Verify the store and try again.');
@@ -99,10 +90,7 @@ class StoreRepositoryTest extends TestCase
         $this->storeRepository->get('some_code');
     }
 
-    /**
-     * @return void
-     */
-    public function testGetWithAvailableStoreFromScope(): void
+    public function testGetWithAvailableStoreFromScope()
     {
         $storeMock = $this->getMockBuilder(Store::class)
             ->disableOriginalConstructor()
@@ -117,10 +105,7 @@ class StoreRepositoryTest extends TestCase
         $this->assertEquals($storeMock, $this->storeRepository->get('some_code'));
     }
 
-    /**
-     * @return void
-     */
-    public function testGetByIdWithAvailableStoreFromScope(): void
+    public function testGetByIdWithAvailableStoreFromScope()
     {
         $storeMock = $this->getMockBuilder(Store::class)
             ->disableOriginalConstructor()
@@ -141,10 +126,7 @@ class StoreRepositoryTest extends TestCase
         $this->assertEquals($storeMock, $this->storeRepository->getById(1));
     }
 
-    /**
-     * @return void
-     */
-    public function testGetByIdWithException(): void
+    public function testGetByIdWithException()
     {
         $this->expectException(NoSuchEntityException::class);
         $this->expectExceptionMessage('The store that was requested wasn\'t found. Verify the store and try again.');
@@ -160,10 +142,7 @@ class StoreRepositoryTest extends TestCase
         $this->storeRepository->getById(1);
     }
 
-    /**
-     * @return void
-     */
-    public function testGetList(): void
+    public function testGetList()
     {
         $storeMock1 = $this->getMockForAbstractClass(StoreInterface::class);
         $storeMock1->expects($this->once())
@@ -189,9 +168,12 @@ class StoreRepositoryTest extends TestCase
                     'code' => 'some_code_2'
                 ]
             ]);
-        $this->storeFactory
+        $this->storeFactory->expects($this->at(0))
             ->method('create')
-            ->willReturnOnConsecutiveCalls($storeMock1, $storeMock2);
+            ->willReturn($storeMock1);
+        $this->storeFactory->expects($this->at(1))
+            ->method('create')
+            ->willReturn($storeMock2);
 
         $this->assertEquals(
             ['some_code' => $storeMock1, 'some_code_2' => $storeMock2],

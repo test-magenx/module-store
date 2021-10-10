@@ -42,9 +42,6 @@ class StoresConfigTest extends TestCase
      */
     protected $_config;
 
-    /**
-     * @inheritdoc
-     */
     protected function setUp(): void
     {
         $this->_storeOne = $this->createMock(Store::class);
@@ -58,24 +55,27 @@ class StoresConfigTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
-    public function testGetStoresConfigByPath(): void
+    public function testGetStoresConfigByPath()
     {
         $path = 'config/path';
 
         $this->_storeOne
+            ->expects($this->at(0))
             ->method('getCode')
             ->willReturn('code_0');
+
         $this->_storeOne
+            ->expects($this->at(1))
             ->method('getId')
             ->willReturn(0);
 
         $this->_storeTwo
+            ->expects($this->at(0))
             ->method('getCode')
             ->willReturn('code_1');
+
         $this->_storeTwo
+            ->expects($this->at(1))
             ->method('getId')
             ->willReturn(1);
 
@@ -86,9 +86,16 @@ class StoresConfigTest extends TestCase
             ->willReturn([0 => $this->_storeOne, 1 => $this->_storeTwo]);
 
         $this->_config
+            ->expects($this->at(0))
             ->method('getValue')
-            ->withConsecutive([$path, 'store', 'code_0'], [$path, 'store', 'code_1'])
-            ->willReturnOnConsecutiveCalls(0, 1);
+            ->with($path, 'store', 'code_0')
+            ->willReturn(0);
+
+        $this->_config
+            ->expects($this->at(1))
+            ->method('getValue')
+            ->with($path, 'store', 'code_1')
+            ->willReturn(1);
 
         $this->assertEquals([0 => 0, 1 => 1], $this->_model->getStoresConfigByPath($path));
     }
